@@ -33,16 +33,16 @@ const Index = () => {
         { label: "Integrar", description: "Integrar pedidos", variant: "default" as const, endpoint: "/pedidos/integrar" },
         { label: "Faturar", description: "Faturar pedidos", variant: "accent" as const, endpoint: "/pedidos/faturar" }
       ]
-    },
-    {
-      title: "Notas",
-      icon: <FileText className="h-5 w-5" />,
-      actions: [
-        { label: "Integrar", description: "Integrar notas fiscais", variant: "default" as const, endpoint: "/notas/integrar" },
-        { label: "Emitir", description: "Emitir notas fiscais", variant: "accent" as const, endpoint: "/notas/emitir" },
-        { label: "Confirmar", description: "Confirmar notas fiscais", variant: "success" as const, endpoint: "/notas/confirmar" }
-      ]
     }
+    // {
+    //   title: "Notas",
+    //   icon: <FileText className="h-5 w-5" />,
+    //   actions: [
+    //     { label: "Integrar", description: "Integrar notas fiscais", variant: "default" as const, endpoint: "/notas/integrar" },
+    //     { label: "Emitir", description: "Emitir notas fiscais", variant: "accent" as const, endpoint: "/notas/emitir" },
+    //     { label: "Confirmar", description: "Confirmar notas fiscais", variant: "secondary" as const, endpoint: "/notas/confirmar" }
+    //   ]
+    // }
   ]
 
   return (
@@ -63,7 +63,7 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {dashboardSections.map((section) => (
             <DashboardSection
               key={section.title}

@@ -21,7 +21,6 @@ const Index = () => {
       title: "Produtos",
       icon: <ShoppingCart className="h-5 w-5" />,
       actions: [
-        { label: "Buscar", description: "Buscar produtos", variant: "secondary" as const, endpoint: "/produtos/buscar" },
         { label: "Integrar", description: "Integrar produtos", variant: "default" as const, endpoint: "/produtos/integrar" }
       ]
     },
@@ -29,20 +28,10 @@ const Index = () => {
       title: "Pedidos",
       icon: <ClipboardList className="h-5 w-5" />,
       actions: [
-        { label: "Buscar", description: "Buscar pedidos", variant: "secondary" as const, endpoint: "/pedidos/buscar" },
         { label: "Integrar", description: "Integrar pedidos", variant: "default" as const, endpoint: "/pedidos/integrar" },
         { label: "Faturar", description: "Faturar pedidos", variant: "accent" as const, endpoint: "/pedidos/faturar" }
       ]
     }
-    // {
-    //   title: "Notas",
-    //   icon: <FileText className="h-5 w-5" />,
-    //   actions: [
-    //     { label: "Integrar", description: "Integrar notas fiscais", variant: "default" as const, endpoint: "/notas/integrar" },
-    //     { label: "Emitir", description: "Emitir notas fiscais", variant: "accent" as const, endpoint: "/notas/emitir" },
-    //     { label: "Confirmar", description: "Confirmar notas fiscais", variant: "secondary" as const, endpoint: "/notas/confirmar" }
-    //   ]
-    // }
   ]
 
   return (

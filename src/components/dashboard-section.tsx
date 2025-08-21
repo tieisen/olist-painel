@@ -18,7 +18,7 @@ interface DashboardSectionProps {
 }
 
 const apiCall = async (endpoint: string): Promise<Boolean> => {
-  const response = await fetch(`http://localhost:8180${endpoint}`);
+  const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`);
   console.log("Resposta da API:", response);
   if (!response.ok) {
     // Lança um erro para ser capturado pelo bloco catch em handleAction
@@ -49,9 +49,10 @@ export function DashboardSection({ title, icon, actions }: DashboardSectionProps
         })
       }
     } catch (error) {
+      const description = error instanceof Error ? error.message : "Falha ao executar a operação.";
       toast({
         title: "Erro",
-        description: "Falha ao executar a operação.",
+        description: description,
         variant: "destructive"
       })
     } finally {

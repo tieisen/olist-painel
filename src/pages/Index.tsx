@@ -4,7 +4,7 @@ import {
   Package, 
   ShoppingCart, 
   ClipboardList, 
-  FileText,
+  RotateCcw,
   Settings
 } from "lucide-react"
 
@@ -31,7 +31,14 @@ const Index = () => {
         { label: "Integrar", description: "Integrar pedidos", variant: "default" as const, endpoint: "/pedidos/integrar" },
         { label: "Faturar", description: "Faturar pedidos", variant: "accent" as const, endpoint: "/pedidos/faturar" }
       ]
-    }
+    },
+    {
+      title: "Devoluções",
+      icon: <RotateCcw className="h-5 w-5" />,
+      actions: [
+        { label: "Processar", description: "Processar devoluções de pedidos", variant: "default" as const, endpoint: "/pedidos/devolver" }
+      ]
+    }    
   ]
 
   return (

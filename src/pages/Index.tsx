@@ -47,12 +47,18 @@ const Index = () => {
       <header className="border-b bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">              
+              <h1 className="text-xl font-semibold text-foreground">Integrador Olist</h1>              
+            </div>
             <div className="flex items-center gap-3">
               <Settings className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold text-foreground">Integrador Olist</h1>
-              <h1 className="text-l text-foreground self-end">/Painel de Controle</h1>
+              <label htmlFor="empresa">Empresa</label>
+              <select name="empresa" id="empersa" className="text-foreground font-semibold rounded-lg border">
+                <option value="31" selected>STORYA - RS</option>
+                {/* <option value="21">OUTBEAUTY - SC</option> */}
+              </select>            
+              <ThemeToggle />
             </div>
-            <ThemeToggle />
           </div>
         </div>
       </header>

@@ -41,7 +41,7 @@ export function DashboardSection({ title, icon, actions }: DashboardSectionProps
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({})
 
   // novos estados para os inputs numéricos
-  const [numeroPedido, setNumeroPedido] = useState<number | undefined>()
+  const [numeroNunota, setNumeroNunota] = useState<number | undefined>()
   const [numeroNota, setNumeroNota] = useState<number | undefined>()
 
   const handleAction = async (action: DashboardAction) => {
@@ -53,9 +53,14 @@ export function DashboardSection({ title, icon, actions }: DashboardSectionProps
       let method: "GET" | "POST" = "GET"
       let bodyData: object | undefined = undefined
 
-      if (title === "Devoluções") {
+      if (title === "Devoluções de clientes") {
         method = "POST"
-        bodyData = { numeroPedido: numeroPedido ?? null, numeroNota: numeroNota ?? null }
+        bodyData = { numeroNota: numeroNota ?? null }
+      }    
+
+      if (title === "Reverter importação") {
+        method = "POST"
+        bodyData = { numeroNunota: numeroNunota ?? null }
       }    
 
       const result = await apiCall(action.endpoint,method, bodyData)
@@ -68,9 +73,13 @@ export function DashboardSection({ title, icon, actions }: DashboardSectionProps
         })
 
         // 🔹 Limpar os campos após sucesso no card "Devoluções"
-        if (title === "Devoluções") {
-          setNumeroPedido(undefined)
+        if (title === "Devoluções de clientes") {          
           setNumeroNota(undefined)
+        }
+
+        // 🔹 Limpar os campos após sucesso no card "Reverter importação"
+        if (title === "Reverter importação") {          
+          setNumeroNunota(undefined)
         }
 
       }
@@ -96,20 +105,25 @@ export function DashboardSection({ title, icon, actions }: DashboardSectionProps
       </CardHeader>
       <CardContent className="space-y-3">
 
-        {title === "Devoluções" && (
+        {title === "Devoluções de clientes" && (
           <div className="flex gap-2">
             <Input
               type="number"
-              placeholder="Nº Pedido"
-              value={numeroPedido ?? ""}
-              onChange={e => setNumeroPedido(e.target.value ? Number(e.target.value) : undefined)}
-              className="w-full"
-            />
-            <Input
-              type="number"
-              placeholder="Nº Nota"
+              placeholder="Nº Nota de Devolução"
               value={numeroNota ?? ""}
               onChange={e => setNumeroNota(e.target.value ? Number(e.target.value) : undefined)}
+              className="w-full"
+            />
+          </div>
+        )}
+
+        {title === "Reverter importação" && (
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              placeholder="Nº único pedido Sankhya"
+              value={numeroNunota ?? ""}
+              onChange={e => setNumeroNunota(e.target.value ? Number(e.target.value) : undefined)}
               className="w-full"
             />
           </div>
@@ -122,7 +136,8 @@ export function DashboardSection({ title, icon, actions }: DashboardSectionProps
           // 🔹 Desabilitar botão se for "Devoluções" e inputs vazios
           const disableButton =
             isLoading ||
-            (title === "Devoluções" && (numeroPedido === undefined || numeroNota === undefined))
+            (title === "Devoluções de clientes" && numeroNota === undefined)||
+            (title === "Reverter importação" && numeroNunota === undefined)
           
 
           return (

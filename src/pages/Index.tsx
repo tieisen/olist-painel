@@ -5,25 +5,12 @@ import {
   ShoppingCart, 
   ClipboardList, 
   RotateCcw,
-  Settings
+  Settings,
+  Trash2
 } from "lucide-react"
 
 const Index = () => {
   const dashboardSections = [
-    {
-      title: "Estoque",
-      icon: <Package className="h-5 w-5" />,
-      actions: [
-        { label: "Integrar", description: "Integrar estoque", variant: "default" as const, endpoint: "/estoque/integrar" }
-      ]
-    },
-    {
-      title: "Produtos",
-      icon: <ShoppingCart className="h-5 w-5" />,
-      actions: [
-        { label: "Integrar", description: "Integrar produtos", variant: "default" as const, endpoint: "/produtos/integrar" }
-      ]
-    },
     {
       title: "Pedidos",
       icon: <ClipboardList className="h-5 w-5" />,
@@ -33,12 +20,33 @@ const Index = () => {
       ]
     },
     {
-      title: "Devoluções",
+      title: "Reverter importação",
+      icon: <Trash2 className="h-5 w-5" />,
+      actions: [
+        { label: "Processar", description: "Reverte importação de pedidos", variant: "default" as const, endpoint: "/pedidos/anular" }
+      ]
+    },
+    {
+      title: "Devoluções de clientes",
       icon: <RotateCcw className="h-5 w-5" />,
       actions: [
         { label: "Processar", description: "Processar devoluções de pedidos", variant: "default" as const, endpoint: "/pedidos/devolver" }
       ]
-    }    
+    },
+    {
+      title: "Produtos",
+      icon: <ShoppingCart className="h-5 w-5" />,
+      actions: [
+        { label: "Integrar", description: "Integrar produtos", variant: "default" as const, endpoint: "/produtos/integrar" }
+      ]
+    },    
+    {
+      title: "Estoque",
+      icon: <Package className="h-5 w-5" />,
+      actions: [
+        { label: "Integrar", description: "Integrar estoque", variant: "default" as const, endpoint: "/estoque/integrar" }
+      ]
+    }
   ]
 
   return (

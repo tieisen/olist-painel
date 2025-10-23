@@ -1,4 +1,5 @@
 import { DashboardSection } from "@/components/dashboard-section"
+import { useState } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { 
   Package, 
@@ -10,13 +11,15 @@ import {
 } from "lucide-react"
 
 const Index = () => {
+  const [empresa, setEmpresa] = useState("31")
+
   const dashboardSections = [
     {
       title: "Pedidos",
       icon: <ClipboardList className="h-5 w-5" />,
       actions: [
-        { label: "Integrar", description: "Integrar pedidos", variant: "default" as const, endpoint: "/pedidos/integrar" },
-        { label: "Faturar", description: "Faturar pedidos", variant: "accent" as const, endpoint: "/pedidos/faturar" }
+        { label: "Integrar", description: "Integrar pedidos", variant: "default" as const, endpoint: "/pedidos/integrar-lote" },
+        { label: "Faturar", description: "Faturar pedidos", variant: "accent" as const, endpoint: "/pedidos/faturar-lote" }
       ]
     },
     {
@@ -61,10 +64,15 @@ const Index = () => {
             <div className="flex items-center gap-3">
               <Settings className="h-6 w-6 text-primary" />
               <label htmlFor="empresa">Empresa</label>
-              <select name="empresa" id="empersa" className="text-foreground font-semibold rounded-lg border">
-                <option value="31" selected>STORYA - RS</option>
+              <select 
+                name="empresa" 
+                id="empresa" 
+                className="text-foreground font-semibold rounded-lg border"
+                value={empresa}
+                onChange={(e) => setEmpresa(e.target.value)}>
+                <option value="31">STORYA - RS</option>
                 {/* <option value="21">OUTBEAUTY - SC</option> */}
-              </select>            
+              </select>
               <ThemeToggle />
             </div>
           </div>
@@ -80,6 +88,7 @@ const Index = () => {
               title={section.title}
               icon={section.icon}
               actions={section.actions}
+              empresa={empresa}
             />
           ))}
         </div>

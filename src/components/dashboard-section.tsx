@@ -16,6 +16,7 @@ interface DashboardSectionProps {
   title: string
   icon: React.ReactNode
   actions: DashboardAction[]
+  empresa: string
 }
 
 const apiCall = async (endpoint: string, method: "GET" | "POST", bodyData?: object): Promise<Boolean> => {
@@ -36,7 +37,7 @@ const apiCall = async (endpoint: string, method: "GET" | "POST", bodyData?: obje
   }
 };
 
-export function DashboardSection({ title, icon, actions }: DashboardSectionProps) {
+export function DashboardSection({ title, icon, actions, empresa }: DashboardSectionProps) {
   const { toast } = useToast()
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({})
 
@@ -55,12 +56,17 @@ export function DashboardSection({ title, icon, actions }: DashboardSectionProps
 
       if (title === "Devoluções de clientes") {
         method = "POST"
-        bodyData = { numeroNota: numeroNota ?? null }
+        bodyData = { numeroNota: numeroNota ?? null, codemp: empresa }
       }    
 
       if (title === "Reverter importação") {
         method = "POST"
-        bodyData = { numeroNunota: numeroNunota ?? null }
+        bodyData = { nunota: numeroNunota ?? null, codemp: empresa }
+      }    
+
+      if (title === "Pedidos") {
+        method = "POST"
+        bodyData = { codemp: empresa }
       }    
 
       const result = await apiCall(action.endpoint,method, bodyData)
@@ -137,8 +143,7 @@ export function DashboardSection({ title, icon, actions }: DashboardSectionProps
           const disableButton =
             isLoading ||
             (title === "Devoluções de clientes" && numeroNota === undefined)||
-            (title === "Reverter importação" && numeroNunota === undefined)
-          
+            (title === "Reverter importação" && numeroNunota === undefined)         
 
           return (
             <Button

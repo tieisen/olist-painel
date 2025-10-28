@@ -69,6 +69,16 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
         bodyData = { codemp: empresa }
       }    
 
+      if (title === "Produtos") {
+        method = "POST"
+        bodyData = { codemp: empresa }
+      }    
+
+      if (title === "Estoque") {
+        method = "POST"
+        bodyData = { codemp: empresa }
+      }    
+
       const result = await apiCall(action.endpoint,method, bodyData)
       
       if (result) {

@@ -33,7 +33,7 @@ const Index = () => {
       title: "Devoluções de clientes",
       icon: <RotateCcw className="h-5 w-5" />,
       actions: [
-        { label: "Processar", description: "Processar devoluções de pedidos", variant: "default" as const, endpoint: "/pedidos/devolver" }
+        { label: "Processar", description: "Processar devoluções de pedidos", variant: "default" as const, endpoint: "/devolucoes/devolver" }
       ]
     },
     {

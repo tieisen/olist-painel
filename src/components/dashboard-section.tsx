@@ -56,7 +56,7 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
 
       if (title === "Devoluções de clientes") {
         method = "POST"
-        bodyData = { numeroNota: numeroNota ?? null, codemp: empresa }
+        bodyData = { numero: numeroNota ?? null, codemp: empresa }
       }    
 
       if (title === "Reverter importação") {

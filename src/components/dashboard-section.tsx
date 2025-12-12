@@ -44,6 +44,7 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
   // novos estados para os inputs numéricos
   const [numeroNunota, setNumeroNunota] = useState<number | undefined>()
   const [numeroNota, setNumeroNota] = useState<number | undefined>()
+  const [dataBaixa, setDataBaixa] = useState<string | undefined>()
 
   const handleAction = async (action: DashboardAction) => {
     const loadingKey = `${title}-${action.label}`
@@ -64,6 +65,11 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
         bodyData = { nunota: numeroNunota ?? null, codemp: empresa }
       }    
 
+      if (title === "Financeiro") {
+        method = "POST"
+        bodyData = { data: dataBaixa ?? null, codemp: empresa }
+      }    
+
       if (title === "Pedidos") {
         method = "POST"
         bodyData = { codemp: empresa }
@@ -77,8 +83,8 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
       if (title === "Estoque") {
         method = "POST"
         bodyData = { codemp: empresa }
-      }    
-
+      }
+      
       const result = await apiCall(action.endpoint,method, bodyData)
       
       if (result) {
@@ -96,6 +102,11 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
         // 🔹 Limpar os campos após sucesso no card "Reverter importação"
         if (title === "Reverter importação") {          
           setNumeroNunota(undefined)
+        }
+
+        // 🔹 Limpar os campos após sucesso no card "FinanceiroReverter importação"
+        if (title === "Financeiro") {          
+          setDataBaixa(undefined)
         }
 
       }
@@ -145,6 +156,18 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
           </div>
         )}
 
+        {title === "Financeiro" && (
+          <div className="flex gap-2">
+            <Input
+              type="date"
+              placeholder="Data"
+              value={dataBaixa ?? ""}
+              onChange={e => setDataBaixa(e.target.value ? String(e.target.value) : undefined)}
+              className="w-full"
+            />
+          </div>
+        )}
+
         {actions.map((action) => {
           const loadingKey = `${title}-${action.label}`
           const isLoading = loadingStates[loadingKey]
@@ -153,7 +176,8 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
           const disableButton =
             isLoading ||
             (title === "Devoluções de clientes" && numeroNota === undefined)||
-            (title === "Reverter importação" && numeroNunota === undefined)         
+            (title === "Reverter importação" && numeroNunota === undefined)||
+            (title === "Financeiro" && dataBaixa === undefined)
 
           return (
             <Button

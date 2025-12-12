@@ -7,7 +7,8 @@ import {
   ClipboardList, 
   RotateCcw,
   Settings,
-  Trash2
+  Trash2,
+  CircleDollarSign
 } from "lucide-react"
 
 const Index = () => {
@@ -27,6 +28,13 @@ const Index = () => {
       icon: <Trash2 className="h-5 w-5" />,
       actions: [
         { label: "Processar", description: "Reverte importação de pedidos", variant: "default" as const, endpoint: "/pedidos/anular" }
+      ]
+    },
+    {
+      title: "Financeiro",
+      icon: <CircleDollarSign className="h-5 w-5" />,
+      actions: [
+        { label: "Baixar títulos", description: "Processar baixa de contas a receber", variant: "default" as const, endpoint: "/financeiro/baixar" }
       ]
     },
     {
@@ -71,7 +79,7 @@ const Index = () => {
                 value={empresa}
                 onChange={(e) => setEmpresa(e.target.value)}>
                 <option value="31">STORYA - RS</option>
-                {/* <option value="21">OUTBEAUTY - SC</option> */}
+                <option value="21">OUTBEAUTY - SC</option>
               </select>
               <ThemeToggle />
             </div>

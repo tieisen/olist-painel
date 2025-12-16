@@ -19,22 +19,43 @@ interface DashboardSectionProps {
   empresa: string
 }
 
-const apiCall = async (endpoint: string, method: "GET" | "POST", bodyData?: object): Promise<Boolean> => {
+interface ProductData {
+  Produto: number;
+  Unidade: string;
+  "Descrição": string;
+  "Saldo no E-commerce": number;
+  "Qtd. solicitada": number;
+}
+
+interface IntegrationData {
+  ecommerce: string;
+  dados: ProductData[];
+}
+
+const apiCall = async (endpoint: string, method: "GET" | "POST", bodyData?: object): Promise<any> => {
   const options: RequestInit = {
     method,
     headers: { "Content-Type": "application/json" },
   }
   if (method === "POST" && bodyData) {
     options.body = JSON.stringify(bodyData)
-  }  
-  const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, options);  
+  }
+  const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, options);
   if (!response.ok) {
     // Lança um erro para ser capturado pelo bloco catch em handleAction
     const errorData = await response.text();
     throw new Error(`Erro na API: ${response.status} ${response.statusText} - ${errorData}`);
-  } else {
-    return response.ok;
   }
+
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    try {
+      return await response.json();
+    } catch (e) {
+      throw new Error("Falha ao processar o JSON da resposta da API.");
+    }
+  }
+  return true; // Retorna true para outras respostas de sucesso que não são JSON
 };
 
 export function DashboardSection({ title, icon, actions, empresa }: DashboardSectionProps) {
@@ -46,11 +67,49 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
   const [numeroNota, setNumeroNota] = useState<number | undefined>()
   const [dataBaixa, setDataBaixa] = useState<string | undefined>()
 
+  const openIntegrationDataInNewTab = (data: IntegrationData[]) => {
+    const newTab = window.open();
+    if (!newTab) {
+      toast({
+        title: "Aviso",
+        description: "Não foi possível abrir a nova guia. Verifique se o seu navegador está bloqueando pop-ups.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    let tableHtml = `
+      <style>
+        body { font-family: sans-serif; margin: 2rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        h2 { color: #333; }
+        .no-data { color: #888; font-style: italic; }
+      </style>
+      <h1>Relatório de Integração de Pedidos</h1>
+    `;
+
+    data.forEach(item => {
+      tableHtml += `<h2>E-commerce: ${item.ecommerce}</h2>`;
+      if (item.dados.length > 0) {
+        tableHtml += '<table><thead><tr><th>Produto</th><th>Descrição</th><th>Unidade</th><th>Saldo no E-commerce</th><th>Qtd. solicitada</th></tr></thead><tbody>';
+        item.dados.forEach(d => {
+          tableHtml += `<tr><td>${d.Produto}</td><td>${d["Descrição"]}</td><td>${d.Unidade}</td><td>${d["Saldo no E-commerce"]}</td><td>${d["Qtd. solicitada"]}</td></tr>`;
+        });
+        tableHtml += '</tbody></table>';
+      } else {
+        tableHtml += '<p class="no-data">Nenhum dado de produto para este e-commerce.</p>';
+      }
+    });
+
+    newTab.document.write(tableHtml);
+    newTab.document.close();
+  };
+
   const handleAction = async (action: DashboardAction) => {
     const loadingKey = `${title}-${action.label}`
-    
     setLoadingStates(prev => ({ ...prev, [loadingKey]: true }))
-    
     try {
       let method: "GET" | "POST" = "GET"
       let bodyData: object | undefined = undefined
@@ -59,33 +118,28 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
         method = "POST"
         bodyData = { numero: numeroNota ?? null, codemp: empresa }
       }    
-
       if (title === "Reverter importação") {
         method = "POST"
         bodyData = { nunota: numeroNunota ?? null, codemp: empresa }
       }    
-
       if (title === "Financeiro") {
         method = "POST"
         bodyData = { data: dataBaixa ?? null, codemp: empresa }
       }    
-
       if (title === "Pedidos") {
         method = "POST"
         bodyData = { codemp: empresa }
       }    
-
       if (title === "Produtos") {
         method = "POST"
         bodyData = { codemp: empresa }
       }    
-
       if (title === "Estoque") {
         method = "POST"
         bodyData = { codemp: empresa }
       }
       
-      const result = await apiCall(action.endpoint,method, bodyData)
+      const result = await apiCall(action.endpoint, method, bodyData)
       
       if (result) {
         toast({
@@ -94,17 +148,21 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
           variant: "success"
         })
 
-        // 🔹 Limpar os campos após sucesso no card "Devoluções"
+        if (title === "Pedidos" && action.label === "Integrar") {
+          openIntegrationDataInNewTab(result);
+        }
+
+        // Limpar os campos após sucesso no card "Devoluções"
         if (title === "Devoluções de clientes") {          
           setNumeroNota(undefined)
         }
 
-        // 🔹 Limpar os campos após sucesso no card "Reverter importação"
+        // Limpar os campos após sucesso no card "Reverter importação"
         if (title === "Reverter importação") {          
           setNumeroNunota(undefined)
         }
 
-        // 🔹 Limpar os campos após sucesso no card "FinanceiroReverter importação"
+        // Limpar os campos após sucesso no card "FinanceiroReverter importação"
         if (title === "Financeiro") {          
           setDataBaixa(undefined)
         }

@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -64,48 +67,81 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
 
   // novos estados para os inputs numéricos
   const [numeroNunota, setNumeroNunota] = useState<number | undefined>()
-  const [numeroNota, setNumeroNota] = useState<number | undefined>()
-  const [dataBaixa, setDataBaixa] = useState<string | undefined>()
+  // const [numeroNota, setNumeroNota] = useState<number | undefined>()
+  // const [dataBaixa, setDataBaixa] = useState<string | undefined>()
+  const [integrationData, setIntegrationData] = useState<IntegrationData[] | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
 
-  const openIntegrationDataInNewTab = (data: IntegrationData[]) => {
-    const newTab = window.open();
-    if (!newTab) {
+  const handleDownloadPdf = () => {
+    if (!integrationData) {
       toast({
         title: "Aviso",
-        description: "Não foi possível abrir a nova guia. Verifique se o seu navegador está bloqueando pop-ups.",
-        variant: "destructive"
+        description: "Não há dados para gerar o PDF.",
+        variant: "default"
       });
       return;
     }
 
-    let tableHtml = `
-      <style>
-        body { font-family: sans-serif; margin: 2rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        h2 { color: #333; }
-        .no-data { color: #888; font-style: italic; }
-      </style>
-      <h1>Relatório de Integração de Pedidos</h1>
-    `;
+    setIsDownloadingPdf(true);
 
-    data.forEach(item => {
-      tableHtml += `<h2>E-commerce: ${item.ecommerce}</h2>`;
-      if (item.dados.length > 0) {
-        tableHtml += '<table><thead><tr><th>Produto</th><th>Descrição</th><th>Unidade</th><th>Saldo no E-commerce</th><th>Qtd. solicitada</th></tr></thead><tbody>';
-        item.dados.forEach(d => {
-          tableHtml += `<tr><td>${d.Produto}</td><td>${d["Descrição"]}</td><td>${d.Unidade}</td><td>${d["Saldo no E-commerce"]}</td><td>${d["Qtd. solicitada"]}</td></tr>`;
-        });
-        tableHtml += '</tbody></table>';
-      } else {
-        tableHtml += '<p class="no-data">Nenhum dado de produto para este e-commerce.</p>';
+    try {
+      const doc = new jsPDF();
+      const pdfWidth = doc.internal.pageSize.getWidth();
+      
+      const getEmpresaName = (cod: string) => {
+        if (cod === "31") return "STORYA - RS";
+        if (cod === "21") return "OUTBEAUTY - SC";
+        return `Código ${cod}`;
       }
-    });
 
-    newTab.document.write(tableHtml);
-    newTab.document.close();
-  };
+      // Cabeçalho principal
+      doc.setFontSize(18);
+      doc.text("Relatório de Integração de Pedidos", pdfWidth / 2, 22, { align: 'center' });
+      doc.setFontSize(12);
+      doc.text(`Empresa: ${getEmpresaName(empresa)}`, pdfWidth / 2, 30, { align: 'center' });
+
+      let finalY = 30;
+
+      integrationData.forEach(item => {
+        // Adiciona um espaço e o título do e-commerce
+        finalY += 10;
+        doc.setFontSize(12);
+        doc.text(`E-commerce: ${item.ecommerce}`, pdfWidth / 2, finalY, { align: 'center' });
+        finalY += 3;
+
+        if (item.dados.length > 0) {
+          autoTable(doc, {
+            head: [["Produto", "Descrição", "Unidade", "Saldo", "Qtd. Solicitada"]],
+            body: item.dados.map(d => [
+              d.Produto,
+              d["Descrição"],
+              d.Unidade,
+              d["Saldo no E-commerce"],
+              d["Qtd. solicitada"]
+            ]),
+            startY: finalY,
+            headStyles: {
+              halign: 'center',
+              valign: 'middle'
+            }
+          });
+          finalY = (doc as any).lastAutoTable.finalY;
+        } else {
+          doc.setFontSize(10);
+          doc.text("Nenhum dado de produto para este e-commerce.", pdfWidth / 2, finalY, { align: 'center' });
+          finalY += 10;
+        }
+      });
+
+      doc.save('relatorio_integracao.pdf');
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast({ title: "Erro", description: "Não foi possível gerar o PDF.", variant: "destructive" });
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  }
 
   const handleAction = async (action: DashboardAction) => {
     const loadingKey = `${title}-${action.label}`
@@ -116,7 +152,7 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
 
       if (title === "Devoluções de clientes") {
         method = "POST"
-        bodyData = { numero: numeroNota ?? null, codemp: empresa }
+        bodyData = { codemp: empresa }
       }    
       if (title === "Reverter importação") {
         method = "POST"
@@ -124,8 +160,8 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
       }    
       if (title === "Financeiro") {
         method = "POST"
-        bodyData = { data: dataBaixa ?? null, codemp: empresa }
-      }    
+        bodyData = { codemp: empresa }
+      }
       if (title === "Pedidos") {
         method = "POST"
         bodyData = { codemp: empresa }
@@ -149,22 +185,13 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
         })
 
         if (title === "Pedidos" && action.label === "Integrar") {
-          openIntegrationDataInNewTab(result);
-        }
-
-        // Limpar os campos após sucesso no card "Devoluções"
-        if (title === "Devoluções de clientes") {          
-          setNumeroNota(undefined)
+          setIntegrationData(result);
+          setIsModalOpen(true);
         }
 
         // Limpar os campos após sucesso no card "Reverter importação"
         if (title === "Reverter importação") {          
           setNumeroNunota(undefined)
-        }
-
-        // Limpar os campos após sucesso no card "FinanceiroReverter importação"
-        if (title === "Financeiro") {          
-          setDataBaixa(undefined)
         }
 
       }
@@ -190,18 +217,6 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
       </CardHeader>
       <CardContent className="space-y-3">
 
-        {title === "Devoluções de clientes" && (
-          <div className="flex gap-2">
-            <Input
-              type="number"
-              placeholder="Nº Nota de Devolução"
-              value={numeroNota ?? ""}
-              onChange={e => setNumeroNota(e.target.value ? Number(e.target.value) : undefined)}
-              className="w-full"
-            />
-          </div>
-        )}
-
         {title === "Reverter importação" && (
           <div className="flex gap-2">
             <Input
@@ -214,18 +229,6 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
           </div>
         )}
 
-        {title === "Financeiro" && (
-          <div className="flex gap-2">
-            <Input
-              type="date"
-              placeholder="Data"
-              value={dataBaixa ?? ""}
-              onChange={e => setDataBaixa(e.target.value ? String(e.target.value) : undefined)}
-              className="w-full"
-            />
-          </div>
-        )}
-
         {actions.map((action) => {
           const loadingKey = `${title}-${action.label}`
           const isLoading = loadingStates[loadingKey]
@@ -233,9 +236,8 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
           // 🔹 Desabilitar botão se for "Devoluções" e inputs vazios
           const disableButton =
             isLoading ||
-            (title === "Devoluções de clientes" && numeroNota === undefined)||
             (title === "Reverter importação" && numeroNunota === undefined)||
-            (title === "Financeiro" && dataBaixa === undefined)
+            (title === "Financeiro" && action.label === "Processar Outros")
 
           return (
             <Button
@@ -256,6 +258,60 @@ export function DashboardSection({ title, icon, actions, empresa }: DashboardSec
             </Button>
           )
         })}
+
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Relatório de Integração de Pedidos</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              {integrationData?.map((item, index) => (
+                <div key={index}>
+                  <h3 className="font-semibold text-lg mb-2">E-commerce: {item.ecommerce}</h3>
+                  {item.dados.length > 0 ? (
+                    <div className="border rounded-md overflow-x-auto">
+                      <table className="w-full text-sm text-left">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="p-2 font-medium">Produto</th>
+                            <th className="p-2 font-medium">Descrição</th>
+                            <th className="p-2 font-medium">Unidade</th>
+                            <th className="p-2 font-medium">Saldo</th>
+                            <th className="p-2 font-medium">Qtd. Solicitada</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {item.dados.map((d, i) => (
+                            <tr key={i} className="border-t">
+                              <td className="p-2">{d.Produto}</td>
+                              <td className="p-2">{d["Descrição"]}</td>
+                              <td className="p-2">{d.Unidade}</td>
+                              <td className="p-2">{d["Saldo no E-commerce"]}</td>
+                              <td className="p-2">{d["Qtd. solicitada"]}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground italic">Nenhum dado de produto para este e-commerce.</p>
+                  )}
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Fechar</Button>
+              <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf}>
+                {isDownloadingPdf ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Baixando...
+                  </>
+                ) : "Baixar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )

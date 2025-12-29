@@ -34,14 +34,15 @@ const Index = () => {
       title: "Financeiro",
       icon: <CircleDollarSign className="h-5 w-5" />,
       actions: [
-        { label: "Baixar títulos", description: "Processar baixa de contas a receber", variant: "default" as const, endpoint: "/financeiro/baixar" }
+        { label: "Processar Shopee", description: "Processar baixa de contas a receber da Shopee", variant: "default" as const, endpoint: "/processar-shopee" },
+        { label: "Processar Outros", description: "Processar baixa de contas a receber", variant: "accent" as const, endpoint: "/financeiro/baixar" }
       ]
     },
     {
       title: "Devoluções de clientes",
       icon: <RotateCcw className="h-5 w-5" />,
       actions: [
-        { label: "Processar", description: "Processar devoluções de pedidos", variant: "default" as const, endpoint: "/devolucoes/devolver" }
+        { label: "Processar", description: "Processar devoluções de pedidos", variant: "default" as const, endpoint: "/devolucoes/integrar" }
       ]
     },
     {

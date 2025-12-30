@@ -34,7 +34,7 @@ const Index = () => {
       title: "Financeiro",
       icon: <CircleDollarSign className="h-5 w-5" />,
       actions: [
-        { label: "Processar Shopee", description: "Processar baixa de contas a receber da Shopee", variant: "default" as const, endpoint: "/processar-shopee" },
+        { label: "Processar Shopee", description: "Processar baixa de contas a receber da Shopee", variant: "default" as const, endpoint: "/financeiro/processar-shopee" },
         { label: "Processar Outros", description: "Processar baixa de contas a receber", variant: "accent" as const, endpoint: "/financeiro/baixar" }
       ]
     },
